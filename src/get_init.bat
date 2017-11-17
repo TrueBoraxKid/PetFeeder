@@ -1,0 +1,1 @@
+mos get init.js --port COM5 > init.js
