@@ -10,7 +10,7 @@ let button = Cfg.get('pins.button');
 let topic_out = '/PetFeeder_response';
 let topic_in = '/PetFeeder_request';
 let subbed = false;
-
+GPIO.set_mode(led, GPIO.MODE_OUTPUT);
 //print('LED GPIO:', led, 'button GPIO:', button);
 
 let getInfo = function() {
@@ -22,20 +22,23 @@ let getInfo = function() {
 };
 
 function mqtt_in_handler(conn, topic, msg){
-	print('=I= Inbound msg on',topic,':',JSON.parse(msg));
+	print('=I= Inbound msg on',topic,':',msg);
+	let value = GPIO.toggle(led);
+	//print('=I= ',JSON.parse(msg));
 	print('=I= Publishing response to',topic_out);
-	let res = MQTT.pub(topic_out,'Beep!',1);
+	let res = MQTT.pub(topic_out,JSON.stringify({led_state: value ? 'Off': 'On'}),1);
+	print('=I= Publish:' res ? 'SUCCESS' : 'FAIL');
 }
 
 // Blink built-in LED every second
-GPIO.set_mode(led, GPIO.MODE_OUTPUT);
-Timer.set(1000 /* 1 sec */, true /* repeat */, function() {
-  let value = GPIO.toggle(led);
-  //print('=I=', value ? 'Tick' : 'Tock');
-  //let message = getInfo();
-  //let ok = MQTT.pub(topic, message, 1);
-  //print('=I= Published:', ok, topic, '->', message);
-}, null);
+
+//Timer.set(1000 /* 1 sec */, true /* repeat */, function() {
+//  //let value = GPIO.toggle(led);
+//  //print('=I=', value ? 'Tick' : 'Tock');
+//  //let message = getInfo();
+//  //let ok = MQTT.pub(topic, message, 1);
+//  //print('=I= Published:', ok, topic, '->', message);
+//}, null);
 
 MQTT.setEventHandler(function(conn, ev, edata) {
 	if (ev !== 0) print('=I= MQTT event handler: got', ev);
