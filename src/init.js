@@ -7,7 +7,9 @@ load('api_timer.js');
 
 let led = Cfg.get('pins.led');
 let button = Cfg.get('pins.button');
-let topic = '/PetFeeder';
+let topic_out = '/PetFeeder_response';
+let topic_in = '/PetFeeder_request';
+let subbed = false;
 
 //print('LED GPIO:', led, 'button GPIO:', button);
 
@@ -19,15 +21,36 @@ let getInfo = function() {
   });
 };
 
+function mqtt_in_handler(conn, topic, msg){
+	print('=I= Inbound msg on',topic,':',JSON.parse(msg));
+	print('=I= Publishing response to',topic_out);
+	let res = MQTT.pub(topic_out,'Beep!',1);
+}
+
 // Blink built-in LED every second
 GPIO.set_mode(led, GPIO.MODE_OUTPUT);
 Timer.set(1000 /* 1 sec */, true /* repeat */, function() {
   let value = GPIO.toggle(led);
-  print(value ? 'Tick' : 'Tock');
-  let message = getInfo();
-  let ok = MQTT.pub(topic, message, 1);
-  print('Published:', ok, topic, '->', message);
+  //print('=I=', value ? 'Tick' : 'Tock');
+  //let message = getInfo();
+  //let ok = MQTT.pub(topic, message, 1);
+  //print('=I= Published:', ok, topic, '->', message);
 }, null);
+
+MQTT.setEventHandler(function(conn, ev, edata) {
+	if (ev !== 0) print('=I= MQTT event handler: got', ev);
+  
+	if(ev === MQTT.EV_CONNACK){
+	if(subbed){	
+		print('=I= CONNACK already subscribed');
+		return;	
+	}
+	print('=I= CONNACK subcribing to ', topic_in);
+	MQTT.sub(topic_in, mqtt_in_handler);
+	subbed = true;
+	}
+}, null);
+
 
 // Publish to MQTT topic on a button press. Button is wired to GPIO pin 0
 /**
