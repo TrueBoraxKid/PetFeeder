@@ -51,6 +51,7 @@ static uint8_t from_hex(const char *s) {
 static void gpio_int_handler(int pin, void *arg) {
   static double last = 0;
   double now = mg_time();
+  
   if (now - last > 0.2) {
     struct mg_connection *c = mgos_mqtt_get_global_conn();
     last = now;
@@ -62,21 +63,32 @@ static void gpio_int_handler(int pin, void *arg) {
   (void) arg;
 }
 
-static void ev_handler(struct mg_connection *c, int ev, void *p,
-                       void *user_data) {
+static void ev_handler(struct mg_connection *c, int ev, void *p, void *user_data) {
+  
   struct mg_mqtt_message *msg = (struct mg_mqtt_message *) p;
-
+	
+	
+	/**
+	* connect and subscribe
+	*/
   if (ev == MG_EV_MQTT_CONNACK) {
-    LOG(LL_INFO, ("CONNACK: %d", msg->connack_ret_code));
-    if (mgos_sys_config_get_mqtt_sub() == NULL ||
-        mgos_sys_config_get_mqtt_pub() == NULL) {
+	LOG(LL_INFO, ("CONNACK: %d", msg->connack_ret_code));
+    if (mgos_sys_config_get_mqtt_sub() == NULL || mgos_sys_config_get_mqtt_pub() == NULL) 		{
       LOG(LL_ERROR, ("Run 'mgos config-set mqtt.sub=... mqtt.pub=...'"));
     } else {
       sub(c, "%s", mgos_sys_config_get_mqtt_sub());
     }
-  } else if (ev == MG_EV_MQTT_SUBACK) {
+  }
+  
+  else if (ev == MG_EV_MQTT_SUBACK) {
     LOG(LL_INFO, ("Subscription %u acknowledged", msg->message_id));
-  } else if (ev == MG_EV_MQTT_PUBLISH) {
+  }
+  
+  /**
+  * if Published
+  */  
+  else if (ev == MG_EV_MQTT_PUBLISH) {
+	  
     struct mg_str *s = &msg->payload;
     struct json_token t = JSON_INVALID_TOKEN;
     char buf[100], asciibuf[sizeof(buf) * 2 + 1];
@@ -85,20 +97,30 @@ static void ev_handler(struct mg_connection *c, int ev, void *p,
     LOG(LL_INFO, ("got command: [%.*s]", (int) s->len, s->p));
     /* Our subscription is at QoS 1, we must acknowledge messages sent ot us. */
     mg_mqtt_puback(c, msg->message_id);
-    if (json_scanf(s->p, s->len, "{gpio: {pin: %d, state: %d}}", &pin,
-                   &state) == 2) {
+    
+	/**
+	* if gpio pin
+	*/
+	if (json_scanf(s->p, s->len, "{gpio: {pin: %d, state: %d}}", &pin,&state) == 2) {
       /* Set GPIO pin to a given state */
       mgos_gpio_set_mode(pin, MGOS_GPIO_MODE_OUTPUT);
       mgos_gpio_write(pin, (state > 0 ? 1 : 0));
       pub(c, "{type: %Q, pin: %d, state: %d}", "gpio", pin, state);
-    } else if (json_scanf(s->p, s->len, "{button: {pin: %d}}", &pin) == 1) {
+    } 
+	/**
+	* if button
+	*/
+	else if (json_scanf(s->p, s->len, "{button: {pin: %d}}", &pin) == 1) {
       /* Report button press on GPIO pin to a publish topic */
       mgos_gpio_set_button_handler(pin, MGOS_GPIO_PULL_UP,
                                    MGOS_GPIO_INT_EDGE_POS, 50, gpio_int_handler,
                                    NULL);
       pub(c, "{type: %Q, pin: %d}", "button", pin);
-    } else if (json_scanf(s->p, s->len, "{i2c_read: {addr: %d, len: %d}}",
-                          &addr, &len) == 2) {
+	}
+	/**
+	* if i2c read
+	*/
+	else if (json_scanf(s->p, s->len, "{i2c_read: {addr: %d, len: %d}}",&addr, &len) == 2) {
       /* Read from I2C */
       struct mgos_i2c *i2c = mgos_i2c_get_global();
       if (len <= 0 || len > (int) sizeof(buf)) {
@@ -121,7 +143,11 @@ static void ev_handler(struct mg_connection *c, int ev, void *p,
         }
         pub(c, "{type: %Q, status: %d, data: %Q}", "i2c_read", ret, asciibuf);
       }
-    } else if (json_scanf(s->p, s->len, "{i2c_write: {data: %T}}", &t) == 1) {
+    } 
+	/**
+	* if i2c write
+	*/
+	else if (json_scanf(s->p, s->len, "{i2c_write: {data: %T}}", &t) == 1) {
       /* Write byte sequence to I2C. First byte is the address */
       struct mgos_i2c *i2c = mgos_i2c_get_global();
       if (i2c == NULL) {
@@ -136,10 +162,14 @@ static void ev_handler(struct mg_connection *c, int ev, void *p,
         ret = mgos_i2c_write(i2c, t.ptr[0], t.ptr + 1, j, true /* stop */);
         pub(c, "{type: %Q, status: %d}", "i2c_write", ret);
       }
-    } else {
-      pub(c, "{error: {code: %d, message: %Q}}", ERROR_UNKNOWN_COMMAND,
-          "unknown command");
+    } 
+	/**
+	* otherwise
+	*/
+	else {
+      pub(c, "{error: {code: %d, message: %Q}}", ERROR_UNKNOWN_COMMAND,"unknown command");
     }
+	
   }
   (void) user_data;
 }
