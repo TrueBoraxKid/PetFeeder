@@ -32,7 +32,7 @@ function mqtt_in_handler(conn, topic, msg){
 
 // Blink built-in LED every second
 
-//Timer.set(1000 /* 1 sec */, true /* repeat */, function() {
+//Timer.set(5000 /* 1 sec */, true /* repeat */, function() {
 //  //let value = GPIO.toggle(led);
 //  //print('=I=', value ? 'Tick' : 'Tock');
 //  //let message = getInfo();
