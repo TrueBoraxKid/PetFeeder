@@ -5,11 +5,15 @@ load('api_net.js');
 load('api_sys.js');
 load('api_timer.js');
 
+print('=======================================');
+print('=======================================');
+
 let led = Cfg.get('pins.led');
-let button = Cfg.get('pins.button');
-let topic = '/devices/' + Cfg.get('device.id') + '/events';
+//let button = Cfg.get('pins.button');
+//let topic = '/devices/' + Cfg.get('device.id') + '/events';
 
 //print('LED GPIO:', led, 'button GPIO:', button);
+
 
 let getInfo = function() {
   return JSON.stringify({
@@ -18,11 +22,11 @@ let getInfo = function() {
   });
 };
 
+//print(Sys.uptime(), getInfo());
 
+GPIO.write(led,1);
 //GPIO.toggle(led);
-
 //Sys.reboot();
-
 
 // Blink built-in LED every second
 /*******************************************
