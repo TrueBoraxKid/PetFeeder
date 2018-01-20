@@ -1,6 +1,6 @@
 /**
  * Copyright 2010-2016 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
+ * kadkajhs
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at:
@@ -77,6 +77,8 @@ public class PubSubActivity extends Activity {
     Button btnSubscribe;
     Button btnPublish;
     Button btnDisconnect;
+    Button btnSwitchLed;
+
 
     AWSIotClient mIotAndroidClient;
     AWSIotMqttManager mqttManager;
@@ -112,6 +114,9 @@ public class PubSubActivity extends Activity {
 
         btnPublish = (Button) findViewById(R.id.btnPublish);
         btnPublish.setOnClickListener(publishClick);
+
+        btnSwitchLed = (Button) findViewById(R.id.btnSwitchLed);
+        btnSwitchLed.setOnClickListener(switchLedClick);
 
         btnDisconnect = (Button) findViewById(R.id.btnDisconnect);
         btnDisconnect.setOnClickListener(disconnectClick);
@@ -345,6 +350,21 @@ public class PubSubActivity extends Activity {
                 Log.e(LOG_TAG, "Disconnect error.", e);
             }
 
+        }
+    };
+	
+	View.OnClickListener switchLedClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+
+            final String topic = "/PetFeeder_request";
+            final String msg = "{led switch request}";
+
+            try {
+                mqttManager.publishString(msg, topic, AWSIotMqttQos.QOS0);
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "Publish error.", e);
+            }
         }
     };
 }
