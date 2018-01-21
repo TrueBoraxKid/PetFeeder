@@ -23,11 +23,20 @@ let getInfo = function() {
 
 function mqtt_in_handler(conn, topic, msg){
 	print('=I= Inbound msg on',topic,':',msg);
-	let value = GPIO.toggle(led);
+	//let value = GPIO.toggle(led);
+	let pin = 0;
+	for (pin = 16;pin<17;pin++) 
+	{
+	 GPIO.set_mode(pin, GPIO.MODE_OUTPUT);
+	 print('=I= toglle pin num',pin);
+	 let value = GPIO.toggle(pin);
+	 print('=I= value of pin',pin,value);
+	 Sys.usleep(2000);
+	}
 	//print('=I= ',JSON.parse(msg));
-	print('=I= Publishing response to',topic_out);
-	let res = MQTT.pub(topic_out,JSON.stringify({led_state: value ? 'Off': 'On'}),1);
-	print('=I= Publish:' res ? 'SUCCESS' : 'FAIL');
+	//print('=I= Publishing response to',topic_out);
+	//let res = MQTT.pub(topic_out,JSON.stringify({led_state: value ? 'Off': 'On'}),1);
+	//print('=I= Publish:' res ? 'SUCCESS' : 'FAIL');
 }
 
 // Blink built-in LED every second
