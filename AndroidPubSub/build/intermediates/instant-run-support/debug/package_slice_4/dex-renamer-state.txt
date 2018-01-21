@@ -1,4 +1,4 @@
-#Sat Dec 23 13:50:06 IST 2017
-base.0=C\:\\Users\\vboldovs\\OneDrive\\Technion\\PROJECT B\\GITREP\\aws-sdk-android-samples\\AndroidPubSub\\build\\intermediates\\transforms\\dexMerger\\debug\\4
+#Sat Dec 23 16:46:18 IST 2017
+base.0=C\:\\Users\\vboldovs\\OneDrive\\Technion\\PROJECT B\\GITREP\\PetFeeder\\AndroidPubSub\\build\\intermediates\\transforms\\dexMerger\\debug\\5
 path.0=classes.dex
 renamed.0=classes.dex

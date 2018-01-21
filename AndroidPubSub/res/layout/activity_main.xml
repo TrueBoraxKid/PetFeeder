@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
@@ -114,10 +115,10 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+        android:orientation="vertical" >
 
         <TextView
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="2"
             android:gravity="center_vertical"
@@ -125,31 +126,25 @@
 
         <EditText
             android:id="@+id/txtTopic"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="5"
             android:gravity="center_vertical" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal" >
 
         <TextView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
             android:layout_weight="2"
             android:gravity="center_vertical"
             android:text="Message:" />
 
         <EditText
             android:id="@+id/txtMessage"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="5"
             android:gravity="center_vertical" />
+
     </LinearLayout>
 
     <Button
@@ -158,5 +153,11 @@
         android:layout_height="wrap_content"
         android:layout_gravity="left"
         android:text="Publish" />
+
+    <Button
+        android:id="@+id/btnSwitchLed"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Switch Led" />
 
 </LinearLayout>
