@@ -6,12 +6,22 @@ load('api_sys.js');
 load('api_timer.js');
 load('api_pwm.js');
 load('api_adc.js');
+load('api_aws.js');
 
 /*********   GLOBALS   ***************/
 let topic_out = '/out';
 let topic_in = '/in';
 let subbed = false;
 let tick_tock = false;
+/****************************************/
+
+/************ SHADOW STATE ******************/
+
+let shadowState = { 
+	photoState: 0, 
+	counter: 0 
+};
+
 /****************************************/
 
  
@@ -29,12 +39,13 @@ let D8 = 15;
 
 
 /*********** FUNCTION CONFIG ****************/
+let photoIN 	= D1;
+let servoPWM 	= D2;
+let button		= D3;
 let led1 		= D4;  //2
 let led2 		= D0;  //16
 let adcpin 		= 0;  
-let photoIN 	= D1;
 //let photoVCC	= D7;
-let servoPWM 	= D2;
 //let servoVCC 	= D6;
 //let = ;
 //let = ;
@@ -85,16 +96,15 @@ function getPhoto()
 
 
 
-function moveServo(pos)
+function moveServo()
 {
-	if (pos === servoState) return;
-	if (pos === 0){
-		print('=I= moving servo: ',servoState,' -> ',pos);
-		PWM.set(servoPWM, 50, 0);
+	if (servoState){
+		print('=I= moving servo: ',servoState,' -> ',1-servoState);
+		PWM.set(servoPWM, 50, 0.055);
 		servoState = 0;
 	}else{
-		print('=I= moving servo: ',servoState,' -> ',pos);
-		PWM.set(servoPWM, 50, 0.15);
+		print('=I= moving servo: ',servoState,' -> ',1-servoState);
+		PWM.set(servoPWM, 50, 0.1);
 		servoState = 1;
 	}
 }
@@ -138,6 +148,8 @@ function mqtt_in_handler(conn, topic, msg){
 Timer.set(2000, true, function() {
   let value = GPIO.toggle(led1);
   if (tick_tock) print('=I=', value ? 'Tick' : 'Tock',"::" ,getInfo());
+  //moveServo();
+  
   
   //print('=I= ADC',adcpin, ': ',ADC.read(adcpin));
   
@@ -155,7 +167,6 @@ Timer.set(2000, true, function() {
   //print('=I= Published:', ok, topic, '->', message);
 }, null);
 
-AWS.Shadow.setStateHandler(,null)
 
 MQTT.setEventHandler(function(conn, ev, edata) {
 	if (ev !== 0) print('=I= MQTT event handler: got', ev);
