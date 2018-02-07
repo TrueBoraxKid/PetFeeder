@@ -38,3 +38,30 @@ GPIO.write(D5,  0);
 GPIO.write(D6,  0);
 GPIO.write(D7,  0);
 GPIO.write(D8,  0);
+
+let devices = {
+	'Photoresistor':	false,
+	'Servo':			false,
+	'ContainerLed':		false,
+	'ADC':				false,
+	//'Weight':			false,
+}
+
+updateDevices: function(){
+	devices['Photoresistor'	] = photo.INIT,
+	devices['Servo'			] = servo.INIT,
+	devices['ContainerLed'  ] = ContainerLed.INIT,
+	devices['ADC'  			] = adc.INIT,
+	//devices['Weight'		] = ,
+}
+
+checkAllDevices: function(){
+	let res = true;
+	updateDevices();
+	for(let key in devices)
+		if (!devices[key]){
+			print('=I= ',key,' is not initialized!');
+			res = false;
+		}
+	return res;
+}

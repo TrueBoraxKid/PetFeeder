@@ -14,33 +14,34 @@ load('autoconfig.js');
 load('Servo.js');
 
 /*********   GLOBALS   ***************/
+
 let topic_out = '/out';
 let topic_in = '/in';
 let subbed = false;
-let tick_tock = false;
+
 /****************************************/
  
-/*********  PINOUT ****************/
-//let D0 = 16;					
-//let D1 = 5;				
-//let D2 = 4;				
-//let D3 = 0	;				
-//let D4 = 2;				
-//let D5 = 14;			
-//let D6 = 12;			
-//let D7 = 13;			
+/*********  PINOUT **********************/
+//let D0 = 16;------ Built-in led 2
+//let D1 = 5; ------ Photoresistor VCC
+//let D2 = 4; ------ Photoresistor data
+//let D3 = 0; 
+//let D4 = 2; ------ Built-in led 1
+//let D5 = 14;------ Servo PWM
+//let D6 = 12;
+//let D7 = 13;
 //let D8 = 15;
 /****************************************/
 
 
-/*********** MANUAL CONFIG ****************/
+/*********** MANUAL MAPPING ****************/
 let led1 		= D4;  //2
 let led2 		= D0;  //16
 
 
 let photoVCC	= D1;
 let photoIN		= D2;
-let servoVCC	= D3;
+//let servoVCC	= D3;
 let servoPWM	= D5;
 
 //let = ;
@@ -52,7 +53,7 @@ let servoPWM	= D5;
 GPIO.set_pull(led2, GPIO.PULL_DOWN);
 GPIO.write(led2,  1);
 
-GPIO.write(servoVCC,1);
+//GPIO.write(servoVCC,1);
 /****************************************/
 
 
@@ -61,10 +62,18 @@ GPIO.write(servoVCC,1);
 ***********************************************************************/
 
 
+/** Devices init start ****/
 
 photo.init(photoVCC,photoIN);
 adc.init();
-servo.init(servoVCC,servoPWM);
+servo.init(servoPWM);
+ContainerLed.init();
+
+//-------------------------
+let devicesStatus = checkAllDevices();
+/** Devices init finish **/
+
+
 
 
 
@@ -81,9 +90,15 @@ function custom_mqtt_handler(topic, msg){
 
 
 Timer.set(2000, true, function() {
-	let value = GPIO.toggle(led1);
-	if (tick_tock) print('=I=', value ? 'Tick' : 'Tock',"::" ,getInfo());
-	
+	GPIO.toggle(led1);
+	if (!devicesStatus){
+		print('=I==============================================I=');
+		print('=I=====		Not all devices were		=======I=');
+		print('=I=====		initialized!!!				=======I=');
+		print('=I=====									=======I=');
+		print('=I==============================================I=');
+		devicesStatus = checkAllDevices();
+	}
 }, null);
 
 
@@ -105,14 +120,18 @@ function mqtt_in_handler(conn, topic, msg){
 		let reading  = adc.read();
 		response = JSON.stringify({'ADC reading':reading});
 	}else if(msg === 'openservo'){
-		servo.open();
-		response = JSON.stringify({'Servo ': 'opened'});
+		let reading = servo.open();
+		response = JSON.stringify({'Servo ': 'opened', 'return code':reading});
 	}else if(msg === 'closeservo'){
-		servo.close();
-		response = JSON.stringify({'Servo ': 'closed'});
+		let reading = servo.close();
+		response = JSON.stringify({'Servo ': 'closed', 'return code':reading});
 	}else if(msg === 'toggleservo'){
-		servo.toggle();
-		response = JSON.stringify({'Servo ': servo.STATE});
+		let reading = servo.toggle();
+		response = JSON.stringify({'Servo ': servo.STATE, 'return code':reading});
+	}else if(msg === 'checkcontainer'){
+		let reading = Container.check();
+		let status = reading ? 'Full':'Empty';
+		response = JSON.stringify({'Container ': reading ? 'Full':'Empty', 'return code':reading});
 	}else{
 		//
 	};

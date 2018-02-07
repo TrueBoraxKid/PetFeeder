@@ -19,7 +19,7 @@ dependencies {
 }
 
 android {
-    buildToolsVersion "21.1.2"
+    buildToolsVersion '26.0.2'
     compileSdkVersion 18
 
     defaultConfig {

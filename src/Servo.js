@@ -7,15 +7,15 @@ let servo = {
 	OPEN:  0.3,
 	FREQ: 50,
 	DELAY: 2000*1000,
-	STATE: 0,
+	STATE: -1,
 	/****************************/
-	init: function(vccpin,pwmpin){
+	init: function(pwmpin){
 		print('=I= Initializing Servo');
 		
-		this.VCCPIN =  vccpin;
+		//this.VCCPIN =  vccpin;
 		this.PWMPIN = pwmpin;
 		
-		GPIO.set_mode(this.VCCPIN,  GPIO.MODE_OUTPUT);
+		//GPIO.set_mode(this.VCCPIN,  GPIO.MODE_OUTPUT);
 		GPIO.set_mode(this.PWMPIN,  GPIO.MODE_OUTPUT);
 		
 		print('=I= Servo initialized successfully');
@@ -46,6 +46,7 @@ let servo = {
 	},
 	
 	toggle: function(){
+		if (this.INIT === false) return '=I= Servo not initialized';
 		if(this.STATE === 0){
 			this.open();
 			this.STATE = 1;
