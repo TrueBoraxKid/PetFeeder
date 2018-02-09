@@ -12,6 +12,7 @@ load('photoresistor.js');
 load('ADC.js');
 load('autoconfig.js');
 load('Servo.js');
+load('Container.js');
 
 /*********   GLOBALS   ***************/
 
@@ -25,12 +26,12 @@ let subbed = false;
 //let D0 = 16;------ Built-in led 2
 //let D1 = 5; ------ Photoresistor VCC
 //let D2 = 4; ------ Photoresistor data
-//let D3 = 0; 
+//let D3 = 0; ------ Container led
 //let D4 = 2; ------ Built-in led 1
 //let D5 = 14;------ Servo PWM
-//let D6 = 12;
-//let D7 = 13;
-//let D8 = 15;
+//let D6 = 12;------ 
+//let D7 = 13;------ 
+//let D8 = 15;------ 
 /****************************************/
 
 
@@ -41,8 +42,8 @@ let led2 		= D0;  //16
 
 let photoVCC	= D1;
 let photoIN		= D2;
-//let servoVCC	= D3;
 let servoPWM	= D5;
+let contled 	= D3;
 
 //let = ;
 //let = ;
@@ -61,16 +62,19 @@ GPIO.write(led2,  1);
 ********************** FLOW *******************************************
 ***********************************************************************/
 
-
 /** Devices init start ****/
 
 photo.init(photoVCC,photoIN);
 adc.init();
 servo.init(servoPWM);
-ContainerLed.init();
+ContainerLed.init(contled);
 
 //-------------------------
 let devicesStatus = checkAllDevices();
+if (devicesStatus) 
+	print('=I==============================================I=');
+	print('=I=====   All devices were initialized   =======I=');
+	print('=I==============================================I=');
 /** Devices init finish **/
 
 
@@ -111,7 +115,8 @@ function mqtt_in_handler(conn, topic, msg){
 	
 	print('=I= Inbound msg on',topic);
 	print('=I= MSG: ',msg);
-//	let jmsg = JSON.parse(msg);
+	//let s = JSON.parse(msg);
+	
 	
 	if (msg === 'readphoto'){
 		let reading  = photo.read();
@@ -128,6 +133,10 @@ function mqtt_in_handler(conn, topic, msg){
 	}else if(msg === 'toggleservo'){
 		let reading = servo.toggle();
 		response = JSON.stringify({'Servo ': servo.STATE, 'return code':reading});
+	}else if(msg === 'moveservoto'){
+		response = "Not implemented";
+		//let pos = msg;//getpos
+		//servo.move(pos);
 	}else if(msg === 'checkcontainer'){
 		let reading = Container.check();
 		let status = reading ? 'Full':'Empty';

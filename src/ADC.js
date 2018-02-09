@@ -14,7 +14,10 @@ let adc = {
 	
 	read: function(){
 		if (this.INIT === false) return '=I= ADC not initialized';
-		return ADC.read(0);		
+		print('=I= Reading ADC');
+		let res = ADC.read(0);		
+		print('=I= Read: ', res);
+		return res;
 	},
 	
 };

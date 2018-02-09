@@ -26,8 +26,9 @@ let servo = {
 		
 		//GPIO.write(this.VCCPIN,1);
 		
-
-		PWM.set(this.PWMPIN, this.FREQ, pos);
+		print('=I= Setting PWM Duty cyle: ',pos);
+		let res = PWM.set(this.PWMPIN, this.FREQ, pos);
+		print('=I= ',res ? "SUCCESS":"FAIL");
 		//Timer.set(this.DELAY,false,function(){},null);
 		
 		//Sys.usleep(this.DELAY);

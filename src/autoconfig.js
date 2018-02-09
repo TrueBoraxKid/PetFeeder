@@ -45,17 +45,17 @@ let devices = {
 	'ContainerLed':		false,
 	'ADC':				false,
 	//'Weight':			false,
-}
+};
 
-updateDevices: function(){
-	devices['Photoresistor'	] = photo.INIT,
-	devices['Servo'			] = servo.INIT,
-	devices['ContainerLed'  ] = ContainerLed.INIT,
-	devices['ADC'  			] = adc.INIT,
+let updateDevices = function(){
+	devices['Photoresistor'	] = photo.INIT;
+	devices['Servo'			] = servo.INIT;
+	devices['ContainerLed'  ] = ContainerLed.INIT;
+	devices['ADC'  			] = adc.INIT;
 	//devices['Weight'		] = ,
-}
+};
 
-checkAllDevices: function(){
+let checkAllDevices = function(){
 	let res = true;
 	updateDevices();
 	for(let key in devices)
@@ -64,4 +64,4 @@ checkAllDevices: function(){
 			res = false;
 		}
 	return res;
-}
+};

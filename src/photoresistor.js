@@ -22,11 +22,13 @@ let photo = {
 	
 	read: function(){
 		if (this.INIT === false) return '=I= Photo resistor not initialized';
+		print('=I= Reading photoresistor');
 		GPIO.write(this.VCCPIN,1);
 		Sys.usleep(100);
 		let res = GPIO.read(this.DATAPIN);
 		Sys.usleep(100);
 		GPIO.write(this.VCCPIN,0);
+		print('=I= Read: ', res);
 		return res;
 	},
 	
