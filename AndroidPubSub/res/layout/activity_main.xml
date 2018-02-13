@@ -96,6 +96,11 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
     <Button
         android:id="@+id/btnPublish"
         android:layout_width="match_parent"
@@ -103,11 +108,32 @@
         android:layout_gravity="left"
         android:text="Publish" />
 
-    <Button
-        android:id="@+id/btnSwitchLed"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Switch Led" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="67dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnCheckContainer"
+                android:layout_width="116dp"
+                android:layout_height="match_parent"
+                android:text="Check Container" />
+
+            <Button
+                android:layout_width="116dp"
+                android:layout_height="match_parent"
+                android:text="Check Plate" />
+
+            <Button
+                android:layout_width="116dp"
+                android:layout_height="match_parent"
+                android:text="Feed" />
+
+
+        </LinearLayout>
+
+    </LinearLayout>
 
     <ListView
         android:layout_width="match_parent"

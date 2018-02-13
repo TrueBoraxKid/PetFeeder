@@ -1,0 +1,173 @@
+package com.petfeeder.petfeederapp;
+
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.app.Activity;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+
+import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.amazonaws.mobileconnectors.iot.AWSIotKeystoreHelper;
+import com.amazonaws.mobileconnectors.iot.AWSIotMqttClientStatusCallback;
+import com.amazonaws.mobileconnectors.iot.AWSIotMqttLastWillAndTestament;
+import com.amazonaws.mobileconnectors.iot.AWSIotMqttManager;
+import com.amazonaws.mobileconnectors.iot.AWSIotMqttNewMessageCallback;
+import com.amazonaws.mobileconnectors.iot.AWSIotMqttQos;
+import com.amazonaws.regions.Region;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.iot.AWSIotClient;
+import com.amazonaws.services.iot.model.AttachPrincipalPolicyRequest;
+import com.amazonaws.services.iot.model.CreateKeysAndCertificateRequest;
+import com.amazonaws.services.iot.model.CreateKeysAndCertificateResult;
+
+import java.io.UnsupportedEncodingException;
+import java.security.KeyStore;
+import java.util.UUID;
+
+
+
+public class MainActivity extends AppCompatActivity {
+
+    static final String LOG_TAG = MainActivity.class.getCanonicalName();
+
+    private static final String MQTT_TOPIC_IN = "/in";
+    private static final String MQTT_TOPIC_OUT = "/out";
+
+	private static final String CHECK_CONTAINER_MSG = "readphoto";
+    //private static final String CHECK_CONTAINER_MSG = "checkcontainer";
+
+    //TODO: history, timestamp for incoming msg
+
+	EditText txtSubcribe;
+    EditText txtTopic;
+    EditText txtMessage;
+
+    TextView tvLastMessage;
+    TextView tvClientId;
+    TextView tvStatus;
+
+    Button btnConnect;
+    Button btnSubscribe;
+    Button btnPublish;
+    Button btnDisconnect;
+    Button btnSwitchLed;
+	Button btnCheckContainer;
+    AWSManager awsmanager = new AWSManager();
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        //txtSubcribe = (EditText) findViewById(R.id.txtSubcribe);
+        //txtTopic = (EditText) findViewById(R.id.txtTopic);
+        //txtMessage = (EditText) findViewById(R.id.txtMessage);
+
+        tvLastMessage = (TextView) findViewById(R.id.tvLastMessage);
+        //tvClientId = (TextView) findViewById(R.id.tvClientId);
+        tvStatus = (TextView) findViewById(R.id.tvStatus);
+
+        //btnConnect = (Button) findViewById(R.id.btnConnect);
+        //btnConnect.setOnClickListener(connectClick);
+        //btnConnect.setEnabled(false);
+
+        //btnDisconnect = (Button) findViewById(R.id.btnDisconnect);
+        //btnDisconnect.setOnClickListener(disconnectClick);
+
+        //btnSubscribe = (Button) findViewById(R.id.btnSubscribe);
+        //btnSubscribe.setOnClickListener(subscribeClick);
+
+        //btnPublish = (Button) findViewById(R.id.btnPublish);
+        //btnPublish.setOnClickListener(publishClick);
+
+//        btnSwitchLed = (Button) findViewById(R.id.btnSwitchLed);
+//        btnSwitchLed.setOnClickListener(switchLedClick);
+
+		btnCheckContainer = (Button) findViewById(R.id.btnCheckContainer);
+        btnCheckContainer.setOnClickListener(checkContainerClick);
+
+        // Initialize aws connection
+        try{
+            awsmanager.init(getApplicationContext());
+        }catch (Exception e){
+            tvStatus.setText("Connection error:" + e);
+        }
+        try {
+            awsmanager.connect(mqttStatusCallback);
+        }catch (Exception e){
+            tvStatus.setText("Connection error:" + e);
+        }
+    }
+
+
+    AWSIotMqttNewMessageCallback newMessageCallback = new AWSIotMqttNewMessageCallback() {
+
+        @Override
+        public void onMessageArrived(final String topic, final byte[] data) {
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        String message = new String(data, "UTF-8");
+                        Log.d(LOG_TAG, "Message arrived:");
+                        Log.d(LOG_TAG, "   Topic: " + topic);
+                        Log.d(LOG_TAG, " Message: " + message);
+
+                        tvLastMessage.setText(message);
+
+                    } catch (UnsupportedEncodingException e) {
+                        Log.e(LOG_TAG, "Message encoding error.", e);
+                    }
+                }
+            });
+        }
+    };
+
+    AWSIotMqttClientStatusCallback mqttStatusCallback = new AWSIotMqttClientStatusCallback() {
+        @Override
+        public void onStatusChanged(final AWSIotMqttClientStatus status,
+                                    final Throwable throwable) {
+            Log.d(LOG_TAG, "Status = " + String.valueOf(status));
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (status == AWSIotMqttClientStatus.Connecting) {
+                        tvStatus.setText("Connecting...");
+
+                    } else if (status == AWSIotMqttClientStatus.Connected) {
+                        awsmanager.subscribe(newMessageCallback);
+                        tvStatus.setText("Connected");
+
+                    } else if (status == AWSIotMqttClientStatus.Reconnecting) {
+                        if (throwable != null) {
+                            Log.e(LOG_TAG, "Connection error.", throwable);
+                        }
+                        tvStatus.setText("Reconnecting");
+                    } else if (status == AWSIotMqttClientStatus.ConnectionLost) {
+                        if (throwable != null) {
+                            Log.e(LOG_TAG, "Connection error.", throwable);
+                        }
+                        tvStatus.setText("Disconnected");
+                    } else {
+                        tvStatus.setText("Disconnected");
+
+                    }
+                }
+            });
+        }
+    };
+
+	View.OnClickListener checkContainerClick = new View.OnClickListener() {
+		@Override
+        public void onClick(View v) {
+			awsmanager.publish(CHECK_CONTAINER_MSG);
+		}
+	
+	};
+	
+}
