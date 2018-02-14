@@ -55,6 +55,7 @@
                 android:id="@+id/btnCheckContainer"
                 android:layout_width="150dp"
                 android:layout_height="150dp"
+                android:minLines="2"
                 android:text="Check Container" />
 
         </LinearLayout>
@@ -66,10 +67,10 @@
 
 
             <Button
-                android:id="@+id/btnConnect"
+                android:id="@+id/btnCheckPlate"
                 android:layout_width="150dp"
                 android:layout_height="150dp"
-                android:text="Connect" />
+                android:text="Check Plate" />
 
             <Button
                 android:layout_width="150dp"

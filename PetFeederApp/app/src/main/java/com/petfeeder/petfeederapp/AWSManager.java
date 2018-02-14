@@ -44,12 +44,6 @@ public class AWSManager{
 	private static final String MQTT_TOPIC_IN = "/in";
 	private static final String MQTT_TOPIC_OUT = "/out";
 
-	private static final String CHECK_CONTAINER_MSG = "readphoto";
-	//private static final String CHECK_CONTAINER_MSG = "checkcontainer";
-
-	//TODO: history, timestamp for incoming msg
-
-
 	AWSIotClient mIotAndroidClient;
 	AWSIotMqttManager mqttManager;
 	String clientId;
@@ -93,15 +87,11 @@ public class AWSManager{
 		mIotAndroidClient.setRegion(region);
 
 		keystorePath = appContext.getFilesDir().getPath();
-		//keystorePath = Environment.getExternalStorageDirectory()+"keystore";
-		//keystorePath = "/storage/emulated/0/keystore";
-
-		File f = new File(keystorePath);
 
 		keystoreName = KEYSTORE_NAME;
 		keystorePassword = KEYSTORE_PASSWORD;
 		certificateId = CERTIFICATE_ID;
-		//AWSIotKeystoreHelper.deleteKeystoreAlias(certificateId,keystorePath,keystoreName,keystorePassword);
+
 		// To load cert/key from keystore on filesystem
 		try {
 			if (AWSIotKeystoreHelper.isKeystorePresent(keystorePath, keystoreName)) {
@@ -125,16 +115,8 @@ public class AWSManager{
 		if (clientKeyStore == null) {
 			Log.i(LOG_TAG, "Cert/key was not found in keystore - creating new key and certificate.");
 
-			//final String certPem = "";
 
-			//final String privKey ="";
-
-			//final String certARN = "arn:aws:iot:us-west-2:862529152389:cert/e6a3fbd302a44645adbbafcf7cfc346f4f6a5918de04b11c5014a3e14cca546e";
-
-			new Thread(new Runnable() {
-			//	@Override
-			public void run() {
-					try {
+			try {
 						// Create a new private key and certificate. This call
 						// creates both on the server and returns them to the
 						// device.
@@ -174,13 +156,11 @@ public class AWSManager{
 						policyAttachRequest.setPrincipal(createKeysAndCertificateResult.getCertificateArn());
 						mIotAndroidClient.attachPrincipalPolicy(policyAttachRequest);
 
-					} catch (Exception e) {
-						Log.e(LOG_TAG,
-								"Exception occurred when generating new private key and certificate.",
-								e);
-					}
-				}
-			}).start();
+			} catch (Exception e) {
+				Log.e(LOG_TAG,
+					"Exception occurred when generating new private key and certificate.",
+						e);
+			}
 		}
 	}
 
@@ -191,6 +171,8 @@ public class AWSManager{
 	public void publish(String msg){
 		try {
 			mqttManager.publishString(msg, MQTT_TOPIC_IN, AWSIotMqttQos.QOS0);
+			Log.d(LOG_TAG, " Sending message: ");
+			Log.d(LOG_TAG, " Message: " + msg);
 		} catch (Exception e) {
 			Log.e(LOG_TAG, "Publish error.", e);
 		}
