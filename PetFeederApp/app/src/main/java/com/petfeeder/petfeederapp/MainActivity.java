@@ -191,21 +191,6 @@ public class MainActivity extends Activity {
             keystorePassword = KEYSTORE_PASSWORD;
             certificateId = CERTIFICATE_ID;
 
-            /**
-             File f = new File(getFilesDir(), keystoreName);
-
-             File externalDir = new File(Environment.getExternalStorageDirectory(), "keystore");
-             externalDir.mkdir();
-
-             File copyKeyStore = new File(externalDir, keystoreName);
-
-             FileChannel src = new FileInputStream(f).getChannel();
-             FileChannel dest = new FileOutputStream(copyKeyStore).getChannel();
-             dest.transferFrom(src, 0, src.size());
-             **/
-
-
-
 
             // To load cert/key from keystore on filesystem
             try {
@@ -253,19 +238,10 @@ public class MainActivity extends Activity {
                             // saved as alias "default" so a new certificate isn't
                             // generated each run of this application
 
-                            String certPem = createKeysAndCertificateResult.getCertificatePem();
-                            String privKey = createKeysAndCertificateResult.getKeyPair().getPrivateKey();
-                            String pubKey = createKeysAndCertificateResult.getKeyPair().getPublicKey();
-                            String arn = createKeysAndCertificateResult.getCertificateArn();
-
                             AWSIotKeystoreHelper.saveCertificateAndPrivateKey(certificateId,
                                     createKeysAndCertificateResult.getCertificatePem(),
                                     createKeysAndCertificateResult.getKeyPair().getPrivateKey(),
                                     keystorePath, keystoreName, keystorePassword);
-                            //AWSIotKeystoreHelper.saveCertificateAndPrivateKey(certificateId,
-                            //		certPem,
-                            //		privKey,
-                            //		keystorePath, keystoreName, keystorePassword);
 
                             // load keystore from file into memory to pass on
                             // connection
@@ -281,9 +257,7 @@ public class MainActivity extends Activity {
                             policyAttachRequest.setPolicyName(AWS_IOT_POLICY_NAME);
                             policyAttachRequest.setPrincipal(createKeysAndCertificateResult
                                     .getCertificateArn());
-
-                            policyAttachRequest.setPrincipal(arn);
-
+                            
                             mIotAndroidClient.attachPrincipalPolicy(policyAttachRequest);
 
                             runOnUiThread(new Runnable() {
