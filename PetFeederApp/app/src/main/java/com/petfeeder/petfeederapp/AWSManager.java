@@ -44,21 +44,27 @@ public class AWSManager{
 	private static final String MQTT_TOPIC_IN = "/in";
 	private static final String MQTT_TOPIC_OUT = "/out";
 
+	private Boolean subscribed = false;
+	private static AWSManager manager = null;
+
 	AWSIotClient mIotAndroidClient;
 	AWSIotMqttManager mqttManager;
+	CognitoCachingCredentialsProvider credentialsProvider;
 	String clientId;
 	String keystorePath;
-	String fakeKeystorePath;
 	String keystoreName;
 	String keystorePassword;
-	KeyStore clientKeyStore = null;
-	KeyStore fakeClientKeyStore = null;
 	String certificateId;
 
-	private Boolean subscribed = false;
+	KeyStore clientKeyStore = null;
+	private AWSManager(){};
 
-
-	CognitoCachingCredentialsProvider credentialsProvider;
+	public static AWSManager getInstance(){
+		if(manager == null){
+			manager = new AWSManager();
+		}
+		return manager;
+	}
 
 	public void init (Context appContext) {
 
