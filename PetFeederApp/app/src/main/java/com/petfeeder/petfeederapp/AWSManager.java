@@ -1,6 +1,7 @@
 package com.petfeeder.petfeederapp;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -44,8 +45,6 @@ public class AWSManager{
 	private static final String MQTT_TOPIC_IN = "/in";
 	private static final String MQTT_TOPIC_OUT = "/out";
 
-	private Boolean subscribed = false;
-	private static AWSManager manager = null;
 
 	AWSIotClient mIotAndroidClient;
 	AWSIotMqttManager mqttManager;
@@ -57,6 +56,17 @@ public class AWSManager{
 	String certificateId;
 
 	KeyStore clientKeyStore = null;
+	
+
+	private Activity mainActivity = null;
+
+	private TextView tvStatus = null;
+	private TextView tvLastMessage = null;
+	
+	private Boolean subscribed = false;
+	private Boolean connected = false;
+
+	private static AWSManager manager = null;
 	private AWSManager(){};
 
 	public static AWSManager getInstance(){
@@ -66,8 +76,14 @@ public class AWSManager{
 		return manager;
 	}
 
-	public void init (Context appContext) {
+	public void init (Context appContext, TextView statusView, TextView lastMsgView, Activity mainActivity) {
 
+		// views used by callbacks 
+		tvStatus = statusView;
+		tvLastMessage = lastMsgView;
+		this.mainActivity = mainActivity;
+		//
+		
 		clientId = UUID.randomUUID().toString();
 		credentialsProvider = new CognitoCachingCredentialsProvider(
 				appContext, // context
@@ -170,13 +186,13 @@ public class AWSManager{
 		}
 	}
 
-	public void connect(AWSIotMqttClientStatusCallback callback){
-		mqttManager.connect(clientKeyStore, callback);
+	public void connect(){
+		mqttManager.connect(clientKeyStore, mqttStatusCallback);
 	};
 
-	public void publish(String msg){
+	public void publish(String msg, final String topic){
 		try {
-			mqttManager.publishString(msg, MQTT_TOPIC_IN, AWSIotMqttQos.QOS0);
+			mqttManager.publishString(msg, topic, AWSIotMqttQos.QOS0);
 			Log.d(LOG_TAG, " Sending message: ");
 			Log.d(LOG_TAG, " Message: " + msg);
 		} catch (Exception e) {
@@ -184,15 +200,83 @@ public class AWSManager{
 		}
 	}
 
-	public void subscribe(AWSIotMqttNewMessageCallback callback){
+	public void subscribe(){
 		try {
 			if (!subscribed) {
-				mqttManager.subscribeToTopic(this.MQTT_TOPIC_OUT, AWSIotMqttQos.QOS0, callback);
+				mqttManager.subscribeToTopic(this.MQTT_TOPIC_OUT, AWSIotMqttQos.QOS0, newMessageCallback);
 				subscribed = true;
 			}
 		} catch (Exception e) {
 			Log.e(LOG_TAG, "Subscription error.", e);
-			subscribed =false;
+			subscribed = false;
 		}
 	};
+	
+    private AWSIotMqttNewMessageCallback newMessageCallback = new AWSIotMqttNewMessageCallback() {
+		
+       @Override
+       public void onMessageArrived(final String topic, final byte[] data) {
+
+           mainActivity.runOnUiThread(new Runnable() {
+               @Override
+               public void run() {
+                   try {
+                       String message = new String(data, "UTF-8");
+                       Log.d(LOG_TAG, "Message arrived:");
+                       Log.d(LOG_TAG, "   Topic: " + topic);
+                       Log.d(LOG_TAG, " Message: " + message);
+
+                       tvLastMessage.setText(message);
+
+                   } catch (UnsupportedEncodingException e) {
+                       Log.e(LOG_TAG, "Message encoding error.", e);
+                   }
+               }
+           });
+       }
+   };
+   
+    AWSIotMqttClientStatusCallback mqttStatusCallback = new AWSIotMqttClientStatusCallback() {
+        @Override
+        public void onStatusChanged(final AWSIotMqttClientStatus status,
+                                    final Throwable throwable) {
+            Log.d(LOG_TAG, "Status = " + String.valueOf(status));
+
+            mainActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (status == AWSIotMqttClientStatus.Connecting) {
+                        tvStatus.setText("Connecting...");
+                        tvStatus.setTextColor(Color.YELLOW);
+						connected = false;
+
+                    } else if (status == AWSIotMqttClientStatus.Connected) {
+                        subscribe();
+                        tvStatus.setText("Connected");
+                        tvStatus.setTextColor(Color.GREEN);
+                        connected = true;
+
+                    } else if (status == AWSIotMqttClientStatus.Reconnecting) {
+                        if (throwable != null) {
+                            Log.e(LOG_TAG, "Connection error.", throwable);
+                        }
+                        tvStatus.setText("Reconnecting");
+                        tvStatus.setTextColor(Color.YELLOW);
+						connected = false;
+                    } else if (status == AWSIotMqttClientStatus.ConnectionLost) {
+                        if (throwable != null) {
+                            Log.e(LOG_TAG, "Connection error.", throwable);
+                        }
+                        tvStatus.setText("Disconnected");
+                        tvStatus.setTextColor(Color.RED);
+						connected = false;;
+                    } else {
+                        tvStatus.setText("Disconnected");
+                        tvStatus.setTextColor(Color.RED);
+						connected = false;
+                    }
+                }
+            });
+        }
+    };
 }

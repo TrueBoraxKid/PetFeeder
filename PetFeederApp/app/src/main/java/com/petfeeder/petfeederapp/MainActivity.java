@@ -1,5 +1,6 @@
 package com.petfeeder.petfeederapp;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
@@ -45,13 +46,8 @@ public class MainActivity extends AppCompatActivity {
 
     static final String LOG_TAG = MainActivity.class.getCanonicalName();
 
-    private static final String MQTT_TOPIC_IN = "/in";
-    private static final String MQTT_TOPIC_OUT = "/out";
-
-
     //TODO: history,
     //TODO: timestamp for Log
-
 
 
     TextView tvLastMessage;
@@ -59,142 +55,86 @@ public class MainActivity extends AppCompatActivity {
 
     Button btnCheckContainer;
     Button btnFeed;
+    Button btnStat;
+    Button btnCheckPlate;
+
     List<View> mainButtons = new ArrayList<>();
 
     PopupWindow feedPopupWindow;
+    PopupWindow checkContainerPopupWindow;
+    PopupWindow checkplatePopupWindow;
 
     RelativeLayout mainLayout;
+    Intent statIntent = null;
 
     AWSManager awsmanager = AWSManager.getInstance();
     MQTTmsg messenger = MQTTmsg.getInstance();
+    Device device = new Device();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+		
+		
+		/**************************************/
         tvLastMessage = (TextView) findViewById(R.id.tvLastMessage);
         tvStatus = (TextView) findViewById(R.id.tvStatus);
 
-        btnCheckContainer = (Button) findViewById(R.id.btnCheckContainer);
-        btnCheckContainer.setOnClickListener(checkContainerClick);
-        mainButtons.add(btnCheckContainer);
+        btnFeed 			=(Button) findViewById(R.id.btnFeed);
+        btnCheckContainer 	=(Button) findViewById(R.id.btnCheckContainer);
+        btnCheckPlate 		=(Button) findViewById(R.id.btnCheckPlate);
+        btnStat 			=(Button) findViewById(R.id.btnStat);
 
-        btnFeed =(Button) findViewById(R.id.btnFeed);
+
+        mainLayout = (RelativeLayout) findViewById(R.id.mainLayout);
+        LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+
+        View.OnClickListener checkContainerClick    = new containerClick(inflater,mainLayout, this);
+        View.OnClickListener checkPlateClick        = new plateClick(inflater,mainLayout, this);
+        View.OnClickListener feedClick              = new feedClick(inflater, mainLayout, this);
+
         btnFeed.setOnClickListener(feedClick);
+        btnCheckContainer.setOnClickListener(checkContainerClick);
+        btnCheckPlate.setOnClickListener(checkPlateClick);
+        btnStat.setOnClickListener(statClick);
+
+        mainButtons.add(btnCheckContainer);
         mainButtons.add(btnFeed);
+        mainButtons.add(btnStat);
+        mainButtons.add(btnCheckPlate);
 
-
-        // Initialize aws connection
+        this.statIntent =  new Intent(this, StatisticsActivity.class);
+		/****************************************/
+		
+		// Initialize aws connection
         try{
-            awsmanager.init(getApplicationContext());
-            awsmanager.connect(mqttStatusCallback);
+			
+            awsmanager.init(getApplicationContext(), tvStatus, tvLastMessage, this);
+            awsmanager.connect();
         }catch (Exception e){
             tvStatus.setText("Connection error:" + e);
             tvStatus.setTextColor(Color.RED);
         }
     }
 
-    AWSIotMqttNewMessageCallback newMessageCallback = new AWSIotMqttNewMessageCallback() {
+	
+	
+	/****************************************/
 
-        @Override
-        public void onMessageArrived(final String topic, final byte[] data) {
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        String message = new String(data, "UTF-8");
-                        Log.d(LOG_TAG, "Message arrived:");
-                        Log.d(LOG_TAG, "   Topic: " + topic);
-                        Log.d(LOG_TAG, " Message: " + message);
-
-                        tvLastMessage.setText(message);
-
-                    } catch (UnsupportedEncodingException e) {
-                        Log.e(LOG_TAG, "Message encoding error.", e);
-                    }
-                }
-            });
-        }
-    };
-
-    AWSIotMqttClientStatusCallback mqttStatusCallback = new AWSIotMqttClientStatusCallback() {
-        @Override
-        public void onStatusChanged(final AWSIotMqttClientStatus status,
-                                    final Throwable throwable) {
-            Log.d(LOG_TAG, "Status = " + String.valueOf(status));
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (status == AWSIotMqttClientStatus.Connecting) {
-                        tvStatus.setText("Connecting...");
-                        tvStatus.setTextColor(Color.YELLOW);
-
-                    } else if (status == AWSIotMqttClientStatus.Connected) {
-                        awsmanager.subscribe(newMessageCallback);
-                        tvStatus.setText("Connected");
-                        tvStatus.setTextColor(Color.GREEN);
-
-                    } else if (status == AWSIotMqttClientStatus.Reconnecting) {
-                        if (throwable != null) {
-                            Log.e(LOG_TAG, "Connection error.", throwable);
-                        }
-                        tvStatus.setText("Reconnecting");
-                        tvStatus.setTextColor(Color.YELLOW);
-                    } else if (status == AWSIotMqttClientStatus.ConnectionLost) {
-                        if (throwable != null) {
-                            Log.e(LOG_TAG, "Connection error.", throwable);
-                        }
-                        tvStatus.setText("Disconnected");
-                        tvStatus.setTextColor(Color.RED);
-                    } else {
-                        tvStatus.setText("Disconnected");
-                        tvStatus.setTextColor(Color.RED);
-
-                    }
-                }
-            });
-        }
-    };
-
-    View.OnClickListener checkContainerClick = new View.OnClickListener() {
+    View.OnClickListener statClick = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            awsmanager.publish(messenger.buildMsg(MQTTmsg.CHECK_CONTAINER_MSG).toString());
-        }
-
-    };
-
-    View.OnClickListener feedClick = new View.OnClickListener(){
-        @Override
-        public void onClick(View v){
-            mainLayout = (RelativeLayout) findViewById(R.id.mainLayout);
-            LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService(LAYOUT_INFLATER_SERVICE);
-            View feedPopupView = inflater.inflate(R.layout.feed_popup_layout,null);
-            feedPopupWindow = new PopupWindow(feedPopupView, LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
-            if(Build.VERSION.SDK_INT>=21) feedPopupView.setElevation(5.0f);
-
-            Button btnfeedPopupClose = (Button) feedPopupView.findViewById(R.id.btnPopupClose);
-            btnfeedPopupClose.setOnClickListener(new View.OnClickListener(){
-                @Override
-                public void onClick(View v){
-                    feedPopupWindow.dismiss();
-                    enableMainButtons();
-                }
-            });
-
-            feedPopupWindow.showAtLocation(mainLayout, Gravity.CENTER,0,0);
-            disableMainButtons();
+            //TODO: New activity, statistics graphical window
+            startActivity(statIntent);
         }
     };
 
-    private void disableMainButtons(){
+    public void disableMainButtons(){
         for (View b: mainButtons)
             b.setClickable(false);
     }
-    private void enableMainButtons(){
+    public void enableMainButtons(){
         for (View b: mainButtons)
             b.setClickable(true);
     }

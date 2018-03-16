@@ -8,14 +8,22 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class MQTTmsg {
-    static final String LOG_TAG = MQTTmsg.class.getCanonicalName();
 
 
     public static final String CHECK_CONTAINER_MSG = "readphoto";
-    //private static final String CHECK_CONTAINER_MSG = "checkcontainer";
+    public static final String CHECK_PLATE_MSG = "readphoto";
+    public static final String FEED_MSG = "moveservo";
+
+    public static final String MQTT_TOPIC_IN = "/in";
+    public static final String MQTT_TOPIC_OUT = "/out";
+    public static final String MQTT_TOPIC_FEED = "/feed";
 
 
+    //TODO: Messagebox, id matching
+    //TODO: Send by topic per device
 
+    static final String LOG_TAG = MQTTmsg.class.getCanonicalName();
+    private AWSManager manager = AWSManager.getInstance();
     private static MQTTmsg messenger = null;
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM-dd-yy-hh-mm-ss");
 
@@ -42,6 +50,12 @@ public class MQTTmsg {
             Log.e(LOG_TAG, "Message builder exception:" + e);
         }
         return msg;
+    }
+
+    public void send(String msg, String topic){
+        //TODO: Send by topic per device
+
+        manager.publish(buildMsg(msg).toString(), topic);
     }
 }
 
