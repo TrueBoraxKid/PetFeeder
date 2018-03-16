@@ -18,6 +18,7 @@ load('Container.js');
 
 let topic_out = '/out';
 let topic_in = '/in';
+let topic_feed = '/feed';
 let subbed = false;
 
 /****************************************/
@@ -115,29 +116,30 @@ function mqtt_in_handler(conn, topic, msg){
 	
 	print('=I= Inbound msg on',topic);
 	print('=I= MSG: ',msg);
-	//let s = JSON.parse(msg);
+	let s = JSON.parse(msg);
 	
+	print(s.payload);
 	
-	if (msg === 'readphoto'){
+	if (s.payload === 'readphoto'){
 		let reading  = photo.read();
 		response = JSON.stringify({'Photoresistor reading':reading});
-	}else if(msg === 'readadc'){
+	}else if(s.payload === 'readphoto1'){
 		let reading  = adc.read();
 		response = JSON.stringify({'ADC reading':reading});
-	}else if(msg === 'openservo'){
+	}else if(s.payload === 'openservo'){
 		let reading = servo.open();
 		response = JSON.stringify({'Servo ': 'opened', 'return code':reading});
-	}else if(msg === 'closeservo'){
+	}else if(s.payload === 'closeservo'){
 		let reading = servo.close();
 		response = JSON.stringify({'Servo ': 'closed', 'return code':reading});
-	}else if(msg === 'toggleservo'){
+	}else if(s.payload === 'readphoto1'){ //CHANGE!!!!!!!!!!!!!
 		let reading = servo.toggle();
 		response = JSON.stringify({'Servo ': servo.STATE, 'return code':reading});
-	}else if(msg === 'moveservoto'){
+	}else if(s.payload === 'moveservoto'){
 		response = "Not implemented";
 		//let pos = msg;//getpos
 		//servo.move(pos);
-	}else if(msg === 'checkcontainer'){
+	}else if(s.payload === 'checkcontainer'){
 		let reading = Container.check();
 		let status = reading ? 'Full':'Empty';
 		response = JSON.stringify({'Container ': reading ? 'Full':'Empty', 'return code':reading});
@@ -163,6 +165,7 @@ MQTT.setEventHandler(function(conn, ev, edata) {
 		}
 		print('=I= CONNACK subcribing to ', topic_in);
 		MQTT.sub(topic_in, mqtt_in_handler);
+		MQTT.sub(topic_feed, mqtt_in_handler);
 		subbed = true;
 	}
 	else if (ev === 5){
