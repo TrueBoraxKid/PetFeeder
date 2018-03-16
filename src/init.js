@@ -120,7 +120,7 @@ function mqtt_in_handler(conn, topic, msg){
 	
 	print(s.payload);
 	
-	if (s.payload === 'readphoto'){
+	if (s.payload === 'readphoto1'){
 		let reading  = photo.read();
 		response = JSON.stringify({'Photoresistor reading':reading});
 	}else if(s.payload === 'readphoto1'){
@@ -132,7 +132,7 @@ function mqtt_in_handler(conn, topic, msg){
 	}else if(s.payload === 'closeservo'){
 		let reading = servo.close();
 		response = JSON.stringify({'Servo ': 'closed', 'return code':reading});
-	}else if(s.payload === 'readphoto1'){ //CHANGE!!!!!!!!!!!!!
+	}else if(s.payload === 'readphoto'){ //CHANGE!!!!!!!!!!!!!
 		let reading = servo.toggle();
 		response = JSON.stringify({'Servo ': servo.STATE, 'return code':reading});
 	}else if(s.payload === 'moveservoto'){
