@@ -1,36 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:padding="3dp" >
+    android:padding="3dp">
+
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" >
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="2"
-            android:gravity="center_vertical"
-            android:text="Client Id:" />
-
-        <TextView
-            android:id="@+id/tvClientId"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="5"
-            android:gravity="center_vertical" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+        android:orientation="horizontal">
 
         <TextView
             android:layout_width="0dp"
@@ -51,13 +31,13 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/btnConnect"
-            android:layout_gravity="left"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_gravity="left"
             android:layout_weight="6"
             android:text="Connect" />
 
@@ -65,78 +45,47 @@
             android:id="@+id/btnDisconnect"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="4"
             android:layout_gravity="right"
+            android:layout_weight="4"
             android:text="Disconnect" />
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
 
-        <EditText
-            android:id="@+id/txtSubcribe"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="5"
-            android:hint="Topic name"
-            android:gravity="center_vertical" />
-
-        <Button
-            android:id="@+id/btnSubscribe"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:text="Subscribe" />
-    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+        android:layout_height="200dp"
+        android:orientation="vertical">
 
         <TextView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="25dp"
             android:layout_weight="2"
             android:gravity="center_vertical|top"
-            android:text="Last message:" />
+            android:text="response:" />
 
         <TextView
             android:id="@+id/tvLastMessage"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="5"
             android:gravity="center_vertical|top"
-            android:text="N/A" />
+            android:text="N/A"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault" />
+
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" >
+        android:orientation="vertical">
 
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="25dp"
             android:layout_weight="2"
             android:gravity="center_vertical"
-            android:text="Topic:" />
-
-        <EditText
-            android:id="@+id/txtTopic"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="5"
-            android:gravity="center_vertical" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_weight="2"
-            android:gravity="center_vertical"
-            android:text="Message:" />
+            android:text="command:" />
 
         <EditText
             android:id="@+id/txtMessage"
@@ -147,6 +96,11 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
     <Button
         android:id="@+id/btnPublish"
         android:layout_width="match_parent"
@@ -154,10 +108,35 @@
         android:layout_gravity="left"
         android:text="Publish" />
 
-    <Button
-        android:id="@+id/btnSwitchLed"
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="67dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnCheckContainer"
+                android:layout_width="116dp"
+                android:layout_height="match_parent"
+                android:text="Check Container" />
+
+            <Button
+                android:layout_width="116dp"
+                android:layout_height="match_parent"
+                android:text="Check Plate" />
+
+            <Button
+                android:layout_width="116dp"
+                android:layout_height="match_parent"
+                android:text="Feed" />
+
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <ListView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Switch Led" />
+        android:layout_height="match_parent" />
 
 </LinearLayout>

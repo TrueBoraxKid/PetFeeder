@@ -1,0 +1,8 @@
+{
+    "state": {
+        "reported": {
+            "ADC": 433,
+            "photo": 0
+        }
+    }
+}
