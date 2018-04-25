@@ -18,6 +18,7 @@ public class MQTTmsg {
     public static final String MQTT_TOPIC_OUT = "/out";
     public static final String MQTT_TOPIC_FEED = "/feed";
 
+    public static final String SHADOW_GET_TOPIC 		= "$aws/things/esp8266_1D291A/shadow/get";
 
     //TODO: Messagebox, id matching
     //TODO: Send by topic per device
@@ -52,10 +53,18 @@ public class MQTTmsg {
         return msg;
     }
 
-    public void send(String msg, String topic){
+    public void sendFormatted(String msg, String topic){
         //TODO: Send by topic per device
 
         manager.publish(buildMsg(msg).toString(), topic);
+    }
+
+    public void send(String msg, String topic){
+        manager.publish(msg, topic);
+    }
+
+    public void send(JSONObject msg, String topic){
+        manager.publish(msg.toString(), topic);
     }
 }
 

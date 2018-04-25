@@ -8,4 +8,42 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+
+    <style name="topPane">
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:padding">2dp</item>
+        <item name="android:layout_margin">5dp</item>
+        <item name="android:background">@drawable/border</item>
+    </style>
+
+    <style name="Pane">
+        <item name="android:layout_height">128dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:padding">2dp</item>
+        <item name="android:layout_margin">5dp</item>
+        <item name="android:background">@drawable/border</item>
+    </style>
+
+    <style name="separator">
+        <item name="android:background">@android:color/darker_gray</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_margin">1dp</item>
+    </style>
+
+    <style name="paneTitle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+	
+	<style name="paneData">
+		<item name="android:layout_width" >match_parent</item>
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:textAlignment">center</item>
+	</style>
 </resources>

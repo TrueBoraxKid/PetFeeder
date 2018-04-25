@@ -25,6 +25,13 @@ import com.amazonaws.services.iot.AWSIotClient;
 import com.amazonaws.services.iot.model.AttachPrincipalPolicyRequest;
 import com.amazonaws.services.iot.model.CreateKeysAndCertificateRequest;
 import com.amazonaws.services.iot.model.CreateKeysAndCertificateResult;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -45,10 +52,16 @@ public class AWSManager{
 	private static final String MQTT_TOPIC_IN = "/in";
 	private static final String MQTT_TOPIC_OUT = "/out";
 
+	private static final String SHADOW_GET_TOPIC 		= "$aws/things/esp8266_1D291A/shadow/get";
+	private static final String SHADOW_GET_ACK_TOPIC	= "$aws/things/esp8266_1D291A/shadow/get/accepted";
+	private static final String SHADOW_UPDATE_TOPIC 	= "$aws/things/esp8266_1D291A/shadow/update";
+	private static final String SHADOW_DOCUMENT_TOPIC 	= "$aws/things/esp8266_1D291A/shadow/update/documents";
+
 
 	AWSIotClient mIotAndroidClient;
 	AWSIotMqttManager mqttManager;
 	CognitoCachingCredentialsProvider credentialsProvider;
+
 	String clientId;
 	String keystorePath;
 	String keystoreName;
@@ -62,7 +75,9 @@ public class AWSManager{
 
 	private TextView tvStatus = null;
 	private TextView tvLastMessage = null;
-	
+	private TextView tvShadowDoc = null;
+	private TextView tvShadowGet = null;
+
 	private Boolean subscribed = false;
 	private Boolean connected = false;
 
@@ -76,12 +91,22 @@ public class AWSManager{
 		return manager;
 	}
 
-	public void init (Context appContext, TextView statusView, TextView lastMsgView, Activity mainActivity) {
+	public void init (Context appContext,
+					  TextView statusView,
+					  TextView lastMsgView,
+					  TextView shadowDoc,
+					  TextView shadowGet,
+					  Activity mainActivity
+	)
+	{
 
 		// views used by callbacks 
 		tvStatus = statusView;
 		tvLastMessage = lastMsgView;
+		tvShadowDoc = shadowDoc;
+		tvShadowGet = shadowGet;
 		this.mainActivity = mainActivity;
+
 		//
 		
 		clientId = UUID.randomUUID().toString();
@@ -203,7 +228,11 @@ public class AWSManager{
 	public void subscribe(){
 		try {
 			if (!subscribed) {
+
 				mqttManager.subscribeToTopic(this.MQTT_TOPIC_OUT, AWSIotMqttQos.QOS0, newMessageCallback);
+				mqttManager.subscribeToTopic(this.SHADOW_DOCUMENT_TOPIC, AWSIotMqttQos.QOS0, shadowDocCallback);
+				mqttManager.subscribeToTopic(this.SHADOW_GET_ACK_TOPIC, AWSIotMqttQos.QOS0, shadowGetAckCallback);
+
 				subscribed = true;
 			}
 		} catch (Exception e) {
@@ -235,8 +264,82 @@ public class AWSManager{
            });
        }
    };
-   
-    AWSIotMqttClientStatusCallback mqttStatusCallback = new AWSIotMqttClientStatusCallback() {
+
+	private AWSIotMqttNewMessageCallback shadowDocCallback = new AWSIotMqttNewMessageCallback() {
+
+		@Override
+		public void onMessageArrived(final String topic, final byte[] data) {
+
+			mainActivity.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						String message = new String(data, "UTF-8");
+						Log.d(LOG_TAG, "Message arrived:");
+						Log.d(LOG_TAG, "   Topic: " + topic);
+						Log.d(LOG_TAG, " Message: " + message);
+
+						JsonParser parser = new JsonParser();
+						Gson gson = new GsonBuilder().setPrettyPrinting().create();
+						JsonElement el = parser.parse(message);
+						String jsonString = gson.toJson(el);
+
+						State container = new State(el.getAsJsonObject().get("current"),"photo");
+						State bowl = new State(el.getAsJsonObject().get("current"), "ADC");
+
+						Device device = Device.getInstance();
+						device.addBowlState(bowl);
+						device.addContainerState(container);
+
+						tvShadowDoc.setText(jsonString);
+
+					} catch (UnsupportedEncodingException e) {
+						Log.e(LOG_TAG, "Message encoding error.", e);
+					}
+				}
+			});
+		}
+	};
+
+	private AWSIotMqttNewMessageCallback shadowGetAckCallback = new AWSIotMqttNewMessageCallback() {
+
+		@Override
+		public void onMessageArrived(final String topic, final byte[] data) {
+
+			mainActivity.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+
+					try {
+						String message = new String(data, "UTF-8");
+						Log.d(LOG_TAG, "Message arrived:");
+						Log.d(LOG_TAG, "   Topic: " + topic);
+						Log.d(LOG_TAG, " Message: " + message);
+
+						JsonParser parser = new JsonParser();
+						Gson gson = new GsonBuilder().setPrettyPrinting().create();
+						JsonElement el = parser.parse(message);
+						String jsonString = gson.toJson(el);
+
+						State container = new State(el,"photo");
+						State bowl = new State(el, "ADC");
+
+						Device device = Device.getInstance();
+						device.addBowlState(bowl);
+						device.addContainerState(container);
+
+
+						tvShadowGet.setText(jsonString);
+
+					} catch (UnsupportedEncodingException e) {
+						Log.e(LOG_TAG, "Message encoding error.", e);
+					}
+				}
+			});
+		}
+	};
+
+	AWSIotMqttClientStatusCallback mqttStatusCallback = new AWSIotMqttClientStatusCallback() {
         @Override
         public void onStatusChanged(final AWSIotMqttClientStatus status,
                                     final Throwable throwable) {

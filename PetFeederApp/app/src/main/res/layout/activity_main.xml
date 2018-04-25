@@ -1,142 +1,221 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/mainLayout"
+
+
+<RelativeLayout android:id="@+id/mainLayout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:gravity="center_horizontal"
     android:orientation="vertical"
     android:padding="3dp"
-	>
+    android:background="@android:color/holo_blue_light"
+    >
 
 
-
-    <LinearLayout
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipeLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <TextView
-            android:id="@+id/tvLastMessage"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-    </LinearLayout>
-
+        android:layout_height="match_parent">
+    <ScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="10dp"
         >
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="5dp"
-            >
+            android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight=".30"
-                android:text="AWS status:" />
+            <LinearLayout style="@style/topPane"
+                android:layout_width="193dp">
 
-            <TextView
-                android:id="@+id/tvStatus"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight=".70"
-                />
+                <TextView style="@style/paneTitle"
+                    android:text="Amazon"/>
+                <View style="@style/separator"/>
+                <TextView android:id="@+id/tvStatus"
+                    style="@style/paneData"/>
+
+            </LinearLayout>
+            <LinearLayout style="@style/topPane"
+                android:layout_width="193dp">
+
+                    <TextView
+                        style="@style/paneTitle"
+                        android:text="Device"/>
+                    <View style="@style/separator"/>
+                    <TextView
+                        style="@style/paneData"
+                        android:text="device status"/>
+            </LinearLayout>
+
+        </LinearLayout>
+        <LinearLayout style="@style/Pane">
+
+            <TextView style="@style/paneData"
+                android:text="notifications"/>
 
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="5dp"
-            >
+            android:orientation="horizontal">
 
-            <TextView
+            <LinearLayout style="@style/Pane"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight=".30"
-                android:text="Plate:"
-                />
+                android:layout_weight=".80">
+                <TextView style="@style/paneTitle"
+                    android:text="Bowl"/>
+                <View style="@style/separator"/>
 
-            <ProgressBar
-                android:id="@+id/plateProgressBar"
-                style="?android:attr/progressBarStyleHorizontal"
+                <ImageView android:id="@+id/bowlProgress"
+                    android:src="@drawable/progress_bar_0"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    />
+
+            </LinearLayout>
+
+            <LinearLayout
+                style="@style/Pane"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight=".60"
-                android:indeterminate="false"
-                android:progress="25"
-                android:visibility="visible"
-                />
+                android:layout_weight=".20">
+
+                <TextView
+                    style="@style/paneTitle"
+                    android:text="container" />
+
+                <View style="@style/separator" />
+
+                <TextView
+                    android:id="@+id/containerStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="empty" />
+            </LinearLayout>
 
         </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="5dp">
+        <LinearLayout style="@style/Pane">
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight=".30"
-                android:text="Container:" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight=".70"
-                android:text="container status"
-                />
-
-
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:visibility="visible">
-
-
-            <Button
+            <ImageButton
                 android:id="@+id/btnFeed"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:text="Feed" />
-
-            <Button
-                android:id="@+id/btnStat"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:text="Statistics" />
+                style="@style/Widget.AppCompat.ImageButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:adjustViewBounds="true"
+                android:background="@null"
+                android:cropToPadding="true"
+                android:scaleType="fitStart"
+                android:scaleX=".9"
+                android:scaleY=".9"
+                android:src="@drawable/bowl_src"
+                android:soundEffectsEnabled="false"/>
 
         </LinearLayout>
-        <LinearLayout
+        <LinearLayout style="@style/Pane">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:text="statistics" />
+            <View style="@style/separator"/>
+
+            
+            <com.jjoe64.graphview.GraphView android:id="@+id/bowlStatGraph"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </LinearLayout>
+        <LinearLayout style="@style/Pane"
+            android:layout_height="wrap_content">
+
+            <TextView style="@style/paneTitle"
+                android:text="Last message"/>
+            <View style="@style/separator"/>
+
+                <TextView
+                    android:id="@+id/tvLastMessage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scrollbars = "vertical"/>
+
+
+        </LinearLayout>
+        <LinearLayout style="@style/Pane"
+            android:layout_height="wrap_content">
+
+            <TextView style="@style/paneTitle"
+                android:text="Shadow state"/>
+            <View style="@style/separator"/>
+
+            <TextView
+                android:id="@+id/tvShadowGet"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:scrollbars = "vertical"/>
+
+
+        </LinearLayout>
+        <LinearLayout style="@style/Pane"
+            android:layout_height="wrap_content">
+
+            <TextView style="@style/paneTitle"
+                android:text="Shadow document"/>
+            <View style="@style/separator"/>
+
+            <TextView
+                android:id="@+id/tvShadowDoc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:scrollbars = "vertical"/>
+
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    </ScrollView>
+    </android.support.v4.widget.SwipeRefreshLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="invisible">
+
+        <Button android:id="@+id/btnShadowGet"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:visibility="invisible">
+            android:text="get shadow" />
+
+        <Button
+            android:id="@+id/btnCheckPlate"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:text="Check Plate" />
+
+        <Button
+            android:id="@+id/btnCheckContainer"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:minLines="2"
+            android:text="Check Container" />
 
 
-            <Button
-                android:id="@+id/btnCheckPlate"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:text="Check Plate" />
 
-            <Button
-                android:id="@+id/btnCheckContainer"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:minLines="2"
-                android:text="Check Container" />
-
-        </LinearLayout>
+        <Button
+            android:id="@+id/btnStat"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:text="Statistics" />
 
     </LinearLayout>
 
