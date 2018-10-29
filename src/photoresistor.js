@@ -4,6 +4,7 @@ let photo = {
 	DATAPIN: -1,
 	NAME: 'Hello, World! I`m photoresistor',
 	INIT: false,
+	DELAY: 1000000,
 	
 	
 	
@@ -24,9 +25,9 @@ let photo = {
 		if (this.INIT === false) return '=I= Photo resistor not initialized';
 		print('=I= Reading photoresistor');
 		GPIO.write(this.VCCPIN,1);
-		Sys.usleep(100);
+		Sys.usleep(this.DELAY);
 		let res = GPIO.read(this.DATAPIN);
-		Sys.usleep(100);
+		Sys.usleep(this.DELAY);
 		GPIO.write(this.VCCPIN,0);
 		print('=I= Read: ', res);
 		return res;

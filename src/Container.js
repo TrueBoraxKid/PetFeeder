@@ -5,9 +5,10 @@ let Container = {
 	
 	check: function(){
 		
-		if (!ContainerLed.enable()){
-			return 'Failed to enable container led';
-		}
+		//if (!ContainerLed.enable()){
+		//	return 'Failed to enable container led';
+		//}
+		ContainerLed.enable()
 		let res = photo.read();
 		ContainerLed.disable();
 		return res;
